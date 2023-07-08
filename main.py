@@ -4,7 +4,6 @@ import tic_tac_toe
 class Game:
     def __init__(self):
         self.ii_train = True
-        self.field = []
         self.gamers = [0, 0]
         self.score = [0, 0]
         self.move_turn_start = 0
@@ -33,12 +32,13 @@ class Game:
         self.main_menu()
 
     def game_new(self):
-        self.field = tic_tac_toe.Field()
         self.gamers = [tic_tac_toe.Gamer('X'), tic_tac_toe.Gamer('O')]
         self.score = [0, 0]
-        self.move_turn_start = int(input('Кто ходит первым (X - 1 / O - 2)? ')) - 1
+        self.move_turn_start = int(input('Кто ходит первым? (X - 1 / O - 2) ')) - 1
 
-        tic_tac_toe.Game(self.field, self.gamers, self.score, self.move_turn_start)
+        game = tic_tac_toe.Game(self.gamers, self.score, self.move_turn_start)
+        game.game_start()
+        self.main_menu()
 
     def game_exit(self):
         pass

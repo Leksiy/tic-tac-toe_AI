@@ -1,7 +1,11 @@
+import ii
+
+
 class Gamer:
     def __init__(self, char):
         self.CHAR = char
         self.GAMER_DICT = {1: 'Человек', 2: 'ИИ'}
+        self.CPU = ii.CPU()
 
         print('Игрок ', self.CHAR)
         for i in self.GAMER_DICT:
@@ -19,6 +23,8 @@ class Gamer:
             while not move_legal:
                 i, j = map(int, input('№ строки № столбца\n').split())
                 move_legal = field.move_legal(i, j)
+        else:
+            i, j = self.CPU.move(field)
         return i, j
 
 
@@ -38,49 +44,113 @@ class Field:
             field += '\n'
         return field
 
+    def clear(self):
+        self.field = [[0 for j in range(self.N)] for i in range(self.N)]
+
     def move(self, gamer, i, j):
-        self.field[i][j] = gamer
+        self.field[i][j] = gamer + 1
 
     def move_legal(self, i, j):
         if self.field[i][j] == 0:
-            res = True
+            legal = True
         else:
-            res = False
-        return res
+            legal = False
+        return legal
 
     def game_over(self):
         end = True
         gamer = 0
+        field_t = list(map(list, zip(*self.field)))
+        field_d = [[], []]
+        for i in range(self.N):
+            field_d[0].append(self.field[i][i])
+            field_d[1].append(self.field[i][self.N -1 -i])
         for i in self.field:
-            if 0 in i:
-                end = False
+            if i.count(1) == self.N:
+                gamer = 1
                 break
+            if i.count(2) == self.N:
+                gamer = 2
+                break
+        for i in field_t:
+            if i.count(1) == self.N:
+                gamer = 1
+                break
+            if i.count(2) == self.N:
+                gamer = 2
+                break
+        for i in field_d:
+            if i.count(1) == self.N:
+                gamer = 1
+                break
+            if i.count(2) == self.N:
+                gamer = 2
+                break
+        if gamer == 0:
+            for i in self.field:
+                if 0 in i:
+                    end = False
+                    break
         return end, gamer
 
 
 class Game:
-    def __init__(self, field, gamers, score, turn_move_start):
-        self.field = field
-        self.gamers = gamers
+    def __init__(self, gamers, score, turn_move_start):
+        self.GAMERS = gamers
+
+        self.field = Field()
         self.score = score
         self.turn_move_start = turn_move_start
-        self.turn_current = self.turn_move_start
+        self.turn_move_current = self.turn_move_start
 
+    def turn_change(self):
+        if self.turn_move_current == 0:
+            self.turn_move_current = 1
+        else:
+            self.turn_move_current = 0
+
+    def turn_start_change(self):
+        if self.turn_move_start == 0:
+            self.turn_move_start = 1
+        else:
+            self.turn_move_start = 0
+
+    def game_start(self):
+        self.field.clear()
         self.game_move()
 
+    def game_new(self):
+        self.turn_start_change()
+        self.turn_move_current = self.turn_move_start
+        self.game_start()
+
+    def game_end(self):
+        pass
+
     def game_over(self):
-        gamer = self.field.game_over()[1]
+        end, gamer = self.field.game_over()
+        result = ''
+        if end:
+            if gamer == 0:
+                result = 'Ничья'
+            else:
+                self.score[gamer - 1] += 1
+                result = 'Победил %s %s\n' % (self.GAMERS[gamer - 1], self.GAMERS[gamer - 1].CHAR)
+            print(self)
+            print(result)
+            next_game = int(input('Играть еще раз? (1 - Да / 2 - Нет) '))
+            if next_game == 1:
+                self.game_new()
+            else:
+                self.game_end()
+        else:
+            self.game_move()
 
     def __str__(self):
-        return '%s %s:%s %s \n %s' % (self.gamers[0], self.score[0], self.score[1], self.gamers[1], self.field)
+        return '%s %s:%s %s \n %s' % (self.GAMERS[0], self.score[0], self.score[1], self.GAMERS[1], self.field)
 
     def game_move(self):
         print(self)
-        while not self.field.game_over()[0]:
-            self.field.move(self.turn_current + 1, *self.gamers[self.turn_current].move(self.field))
-            if self.turn_current == 0:
-                self.turn_current = 1
-            else:
-                self.turn_current = 0
-            self.game_over()
-            self.game_move()
+        self.field.move(self.turn_move_current, *self.GAMERS[self.turn_move_current].move(self.field))
+        self.turn_change()
+        self.game_over()

@@ -1,3 +1,5 @@
+import random
+
 class Perceptron:
     def __init__(self):
         self.w = [1, 1, 1, 1]
@@ -9,3 +11,17 @@ class Perceptron:
             res = 1
         else:
             res = -1
+
+
+class CPU:
+    def __init__(self):
+        pass
+
+    def move(self, field):
+        legal_cell = []
+        for i in range(field.N):
+            for j in range(field.N):
+                if field.field[i][j] == 0:
+                    legal_cell.append([i, j])
+        cell = random.choice(legal_cell)
+        return cell
