@@ -48,15 +48,14 @@ class Field:
             res = False
         return res
 
-    def game_over(self, score):
+    def game_over(self):
         end = True
-        score = [5, 5]
-        for i in range(self.N):
-            for j in range(self.N):
-                if self.field[i][j] == 0:
-                    end = False
-                    break
-        return end
+        gamer = 0
+        for i in self.field:
+            if 0 in i:
+                end = False
+                break
+        return end, gamer
 
 
 class Game:
@@ -69,15 +68,19 @@ class Game:
 
         self.game_move()
 
+    def game_over(self):
+        gamer = self.field.game_over()[1]
+
     def __str__(self):
         return '%s %s:%s %s \n %s' % (self.gamers[0], self.score[0], self.score[1], self.gamers[1], self.field)
 
     def game_move(self):
         print(self)
-        while not self.field.game_over(self.score):
+        while not self.field.game_over()[0]:
             self.field.move(self.turn_current + 1, *self.gamers[self.turn_current].move(self.field))
             if self.turn_current == 0:
                 self.turn_current = 1
             else:
                 self.turn_current = 0
+            self.game_over()
             self.game_move()
