@@ -3,13 +3,13 @@ import random
 
 class Perceptron:
     def __init__(self, x_count):
-        self.LAMDA = 0.2
+        self.LAMBDA = 0.2
 
         self.w = [1 for i in range(x_count + 1)]
 
-    def activate(self, state):
-        x = state.copy()
-        x.append(1)
+    def activate(self, x):
+        x_all = x.copy()
+        x_all.append(1)
         y = 0
         for i, j in zip(x, self.w):
             y += i * j

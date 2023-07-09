@@ -1,5 +1,5 @@
 import tic_tac_toe
-import ii
+import AI
 
 
 class OptionsAI:
@@ -59,30 +59,30 @@ class Menu:
                 case 1:
                     self.game_new()
                 case 2:
-                    self.ii_on_off()
+                    self.ai_on_off()
                 case 3:
-                    self.ii_switch()
+                    self.ai_switch()
                 case 4:
-                    self.ii_about()
+                    self.ai_about()
                 case _:
                     manu_exit = self.game_exit()
 
     def game_new(self):
-        self.gamers = [tic_tac_toe.Gamer('X', self.ii_train), tic_tac_toe.Gamer('O', self.ii_train)]
+        self.gamers = [tic_tac_toe.Gamer('X', self.ai_train), tic_tac_toe.Gamer('O', self.ai_train)]
         self.score = [0, 0]
         self.move_turn_start = int(input('Кто ходит первым? (X - 1 / O - 2) ')) - 1
 
         game = tic_tac_toe.Game(self.gamers, self.score, self.move_turn_start)
         game.game_start()
 
-    def ii_on_off(self):
+    def ai_on_off(self):
         self.options_ai.on_off()
 
-    def ii_switch(self):
+    def ai_switch(self):
         self.options_ai.type_switch()
 
-    def ii_about(self):
-        self.options_ai.about()
+    def ai_about(self):
+        print(self.options_ai.about())
 
     def game_exit(self):
         return True

@@ -1,6 +1,3 @@
-import ii
-
-
 class Gamer:
     def __init__(self, char, ii_train):
         self.CHAR = char
