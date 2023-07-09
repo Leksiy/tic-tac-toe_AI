@@ -2,10 +2,11 @@ import ii
 
 
 class Gamer:
-    def __init__(self, char):
+    def __init__(self, char, ii_train):
         self.CHAR = char
         self.GAMER_DICT = {1: 'Человек', 2: 'ИИ'}
-        self.CPU = ii.CPU()
+        self.CPU = ii.CPU('B')
+        self.II_TRAIN = ii_train
 
         print('Игрок ', self.CHAR)
         for i in self.GAMER_DICT:
@@ -26,6 +27,10 @@ class Gamer:
         else:
             i, j = self.CPU.move(field)
         return i, j
+
+    def ii_train(self, result):
+        if self.gamer_class == 2 and self.II_TRAIN:
+            self.CPU.ii_train(result)
 
 
 class Field:
@@ -120,6 +125,8 @@ class Game:
         self.game_move()
 
     def game_new(self):
+        self.GAMERS[0].CPU.moves = []
+        self.GAMERS[1].CPU.moves = []
         self.turn_start_change()
         self.turn_move_current = self.turn_move_start
         self.game_start()
@@ -136,6 +143,12 @@ class Game:
             else:
                 self.score[gamer - 1] += 1
                 result = 'Победил %s %s\n' % (self.GAMERS[gamer - 1], self.GAMERS[gamer - 1].CHAR)
+                if gamer == 1:
+                    self.GAMERS[0].ii_train(1)
+                    self.GAMERS[1].ii_train(-1)
+                elif gamer == 2:
+                    self.GAMERS[0].ii_train(-1)
+                    self.GAMERS[1].ii_train(1)
             print(self)
             print(result)
             next_game = int(input('Играть еще раз? (1 - Да / 2 - Нет) '))
