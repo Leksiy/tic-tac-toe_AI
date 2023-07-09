@@ -1,11 +1,24 @@
 import random
+import math
 
 
 class Perceptron:
-    def __init__(self, x_count):
-        self.LAMBDA = 0.2
+    def __init__(self, spped, function, x_count):
+        self.SPEED = spped
+        self.FUNCTION = function
 
         self.w = [1 for i in range(x_count + 1)]
+
+    def sign(self, x):
+        if x > 0:
+            y = 1
+        else:
+            y = -1
+        return y
+
+    def sigmoid(self, x):
+        y = round((1 / (1 + math.exp(-x))), 2)
+        return y
 
     def activate(self, x):
         x_all = x.copy()
@@ -13,29 +26,29 @@ class Perceptron:
         y = 0
         for i, j in zip(x, self.w):
             y += i * j
-        if y > 0:
-            y = 1
-        else:
-            y = -1
+        y = self.FUNCTION(y)
         return y
 
-    def study(self, result, move):
-        x = move.state.copy()
-        x.append(1)
+    def study(self, x, y_real, y):
+        x_all = x.copy()
+        x_all.append(1)
         for i in range(len(self.w)):
-            self.w[i] = self.w[i] + self.LAMDA * (result - move.result) * x[i]
-        print(self.w)
+            self.w[i] = self.w[i] + self.SPEED * (y_real - y) * x[i]
 
     def __str__(self):
         return ' '.join(map(str, self.w))
 
 
+# (3, [[27], [27], [1]])
+# (1, [[27]])
+# [[]]
+# [[27, 27, 27...], [27, 27, 27,] [1]]
 class NeuralNet:
-    def __init__(self, level, count):
-        self. perceptrons = []
+    def __init__(self, level, perceptrons):
+        self.perceptrons = []
         for i in range(level):
             self.perceptrons.append([])
-            for j in range(len(count[i])):
+            for j in range(len(perceptrons[i])):
                 self.perceptrons[i].append(Perceptron(count[i][j]))
 
     def __str__(self):
