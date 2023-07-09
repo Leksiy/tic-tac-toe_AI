@@ -39,7 +39,7 @@ class Perceptron:
         return ' '.join(map(str, self.w))
 
 
-# (3, [[27], [27], [1]])
+# (3, [[27, speed, fuctions, x_count], [27], [1]])
 # (1, [[27]])
 # [[]]
 # [[27, 27, 27...], [27, 27, 27,] [1]]
