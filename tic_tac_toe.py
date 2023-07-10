@@ -6,11 +6,9 @@ class Options:
 
 
 class Gamer:
-    def __init__(self, char, ii_train):
+    def __init__(self, char):
         self.CHAR = char
         self.GAMER_DICT = {1: 'Человек', 2: 'ИИ'}
-        self.CPU = ii.CPU('B')
-        self.II_TRAIN = ii_train
 
         print('Игрок ', self.CHAR)
         for i in self.GAMER_DICT:
@@ -29,7 +27,8 @@ class Gamer:
                 i, j = map(int, input('№ строки № столбца\n').split())
                 move_legal = field.move_legal(i, j)
         else:
-            i, j = self.CPU.move(field)
+            pass
+            # i, j = self.CPU.move(field)
         return i, j
 
     def ii_train(self, result):
@@ -66,125 +65,124 @@ class Field:
             legal = False
         return legal
 
-    def game_over(self):
-        end = True
+    def round_over_check(self):
+        over = True
         gamer = 0
-        field_t = list(map(list, zip(*self.field)))
-        field_d = [[], []]
+        field_transposed = list(map(list, zip(*self.field)))
+        field_diagonals = [[], []]
         for i in range(self.N):
-            field_d[0].append(self.field[i][i])
-            field_d[1].append(self.field[i][self.N -1 -i])
-        for i in self.field:
-            if i.count(1) == self.N:
-                gamer = 1
-                break
-            if i.count(2) == self.N:
-                gamer = 2
-                break
-        for i in field_t:
-            if i.count(1) == self.N:
-                gamer = 1
-                break
-            if i.count(2) == self.N:
-                gamer = 2
-                break
-        for i in field_d:
-            if i.count(1) == self.N:
-                gamer = 1
-                break
-            if i.count(2) == self.N:
-                gamer = 2
-                break
+            field_diagonals[0].append(self.field[i][i])
+            field_diagonals[1].append(self.field[i][self.N - 1 - i])
+        for i in range(1, 3):
+            for j in self.field:
+                if j.count(i) == self.N:
+                    gamer = i
+                    break
+            for j in field_transposed:
+                if j.count(i) == self.N:
+                    gamer = i
+                    break
+            for j in field_diagonals:
+                if j.count(i) == self.N:
+                    gamer = i
+                    break
         if gamer == 0:
             for i in self.field:
                 if 0 in i:
-                    end = False
+                    over = False
                     break
-        return end, gamer
+        return over, gamer
 
 
 class Game:
     def __init__(self, ai, options_ai):
         self.OPTIONS_AI = options_ai
+        self.GAMERS = [Gamer('X'), Gamer('O')]
+        self.TURN_MOVE_START = int(input('Кто ходит первым? (X - 1 / O - 2) ')) - 1
 
         self.ai = ai
-        # self.GAMERS = gamers
-        #
-        # self.field = Field()
-        # self.score = score
-        # self.turn_move_start = turn_move_start
-        # self.turn_move_current = self.turn_move_start
+        self.field = Field()
+        self.score = [0, 0]
+        self.turn_move_current = self.TURN_MOVE_START
+        self.turn_move_round = self.turn_move_current
+
+    def turn_move_change(self, turn_move):
+        if turn_move == 0:
+            turn_move = 1
+        else:
+            turn_move = 0
+        return turn_move
 
     def print_ai_options_w(self):
         for i in range(len(self.ai)):
             for j in range(len(self.ai[i])):
-                print('Нейроная сеть: ' + self.ai[i][j].print_w())
+                print('Нейроная сеть: ' + str(i) + '.' + str(j) + '\n' + self.ai[i][j].print_w())
+
+    def __str__(self):
+        return '%s %s:%s %s \n %s' % (self.GAMERS[0], self.score[0], self.score[1], self.GAMERS[1], self.field)
+
+    def start(self):
+        game_next = True
+        while game_next:
+            self.round_start()
+            game_next = (int(input('Играть еще раз? (1 - Да / 2 - Нет) ')) == 1)
+            if game_next == 1:
+                self.round_new()
+            else:
+                self.finish()
+
+    def finish(self):
+        pass
+
+    def round_start(self):
+        self.field.clear()
+        self.turn_move_current = self.turn_move_round
+        self.round()
+
+    def round(self):
+        round_end = False
+        while not round_end:
+            print(self)
+            self.field.move(self.turn_move_current, *self.GAMERS[self.turn_move_current].move(self.field))
+            self.turn_move_current = self.turn_move_change(self.turn_move_current)
+            round_end, gamer = self.field.round_over_check()
+            if round_end:
+                self.round_over(gamer)
+
+    def round_over(self, gamer):
+        result = ''
+        if gamer == 0:
+            result = 'Ничья'
+        else:
+            self.score[gamer - 1] += 1
+            result = 'Победил %s %s\n' % (self.GAMERS[gamer - 1], self.GAMERS[gamer - 1].CHAR)
+        #         if gamer == 1:
+        #             self.GAMERS[0].ii_train(1)
+        #             self.GAMERS[1].ii_train(-1)
+        #         elif gamer == 2:
+        #             self.GAMERS[0].ii_train(-1)
+        #             self.GAMERS[1].ii_train(1)
+        print(self)
+        print(result)
+
+    def round_new(self):
+        # self.GAMERS[0].CPU.moves = []
+        # self.GAMERS[1].CPU.moves = []
+        self.turn_move_round = self.turn_move_change(self.turn_move_round)
 
     def test(self):
         next = True
         while next:
             self.print_ai_options_w()
             x = list(map(int, input('x = ').split()))
+            y = []
             for i in range(len(self.ai)):
+                y.append([])
                 for j in range(len(self.ai[i])):
-                    self.ai[i][j].activate(x)
-
-    def turn_change(self):
-        if self.turn_move_current == 0:
-            self.turn_move_current = 1
-        else:
-            self.turn_move_current = 0
-
-    def turn_start_change(self):
-        if self.turn_move_start == 0:
-            self.turn_move_start = 1
-        else:
-            self.turn_move_start = 0
-
-    def game_start(self):
-        self.field.clear()
-        self.game_move()
-
-    def game_new(self):
-        self.GAMERS[0].CPU.moves = []
-        self.GAMERS[1].CPU.moves = []
-        self.turn_start_change()
-        self.turn_move_current = self.turn_move_start
-        self.game_start()
-
-    def game_end(self):
-        pass
-
-    def game_over(self):
-        end, gamer = self.field.game_over()
-        result = ''
-        if end:
-            if gamer == 0:
-                result = 'Ничья'
-            else:
-                self.score[gamer - 1] += 1
-                result = 'Победил %s %s\n' % (self.GAMERS[gamer - 1], self.GAMERS[gamer - 1].CHAR)
-                if gamer == 1:
-                    self.GAMERS[0].ii_train(1)
-                    self.GAMERS[1].ii_train(-1)
-                elif gamer == 2:
-                    self.GAMERS[0].ii_train(-1)
-                    self.GAMERS[1].ii_train(1)
-            print(self)
-            print(result)
-            next_game = int(input('Играть еще раз? (1 - Да / 2 - Нет) '))
-            if next_game == 1:
-                self.game_new()
-            else:
-                self.game_end()
-        else:
-            self.game_move()
-
-    def __str__(self):
-        return '%s %s:%s %s \n %s' % (self.GAMERS[0], self.score[0], self.score[1], self.GAMERS[1], self.field)
-
-    def game_move(self):
-        print(self)
-        self.field.move(self.turn_move_current, *self.GAMERS[self.turn_move_current].move(self.field))
-        self.turn_change()
-        self.game_over()
+                    y[i].append(self.ai[i][j].activate(x))
+            print(y)
+            y_real = int(input('y = '))
+            if y_real != y[0][0]:
+                for i in range(len(self.ai)):
+                    for j in range(len(self.ai[i])):
+                        self.ai[i][j].study(x, y[0][0], y_real)

@@ -33,11 +33,11 @@ class Perceptron:
                 y = self.sigmoid(y)
         return y
 
-    def study(self, x, y_real, y):
+    def study(self, x, y, y_real):
         x_all = x.copy()
         x_all.append(1)
         for i in range(len(self.w)):
-            self.w[i] = self.w[i] + self.TRAIN_SPEED * (y_real - y) * x[i]
+            self.w[i] = self.w[i] + self.TRAIN_SPEED * (y_real - y) * x_all[i]
 
     def __str__(self):
         return ' '.join(map(str, self.w))
@@ -69,14 +69,26 @@ class NeuralNet:
         w = ''
         for i in range(self.LEVEL):
             for j in range(len(self.perceptrons[i])):
-                w += str(i) + '.' + str(j) + ':\n'
+                w += 'Нейрон: ' + str(i) + '.' + str(j) + '\n'
                 w += self.perceptrons[i][j].__str__() + '\n'
         return w
 
-    def activate(self, x):
-        for j in range(len(self.perceptrons[0])):
-            x_perceptron = x[:len(self.perceptrons[0][j].w) - 1]
-            print(x_perceptron)
+    def activate(self, x_real):
+        x_next_level = x_real.copy()
+        for i in range(self.LEVEL):
+            y = []
+            for j in range(len(self.perceptrons[i])):
+                if j == 0:
+                    x_perceptron = x_next_level[:len(self.perceptrons[i][j].w) - 1]
+                    x_next_level = x_next_level[len(self.perceptrons[i][j].w) - 1:]
+                    y.append(self.perceptrons[i][j].activate(x_perceptron))
+                else:
+                    y.append(self.perceptrons[i][j].activate(x_next_level))
+            x_next_level = y.copy()
+        return x_next_level[0]
+
+    def study(self, x, y, y_real):
+        self.perceptrons[0][0].study(x, y, y_real)
 
     def activate_A(self, x):
         y = self.perceptrons[0][0].activate(x)
