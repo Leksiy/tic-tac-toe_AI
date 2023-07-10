@@ -3,8 +3,8 @@ import math
 
 
 class Perceptron:
-    def __init__(self, spped, function, x_count):
-        self.SPEED = spped
+    def __init__(self, train_spped, function, x_count):
+        self.TRAIN_SPEED = train_spped
         self.FUNCTION = function
 
         self.w = [1 for i in range(x_count + 1)]
@@ -26,37 +26,57 @@ class Perceptron:
         y = 0
         for i, j in zip(x, self.w):
             y += i * j
-        y = self.FUNCTION(y)
+        match self.FUNCTION:
+            case 'sign':
+                y = self.sign(y)
+            case 'sigmoid':
+                y = self.sigmoid(y)
         return y
 
     def study(self, x, y_real, y):
         x_all = x.copy()
         x_all.append(1)
         for i in range(len(self.w)):
-            self.w[i] = self.w[i] + self.SPEED * (y_real - y) * x[i]
+            self.w[i] = self.w[i] + self.TRAIN_SPEED * (y_real - y) * x[i]
 
     def __str__(self):
         return ' '.join(map(str, self.w))
 
 
-# (3, [[27, speed, fuctions, x_count], [27], [1]])
-# (1, [[27]])
-# [[]]
-# [[27, 27, 27...], [27, 27, 27,] [1]]
 class NeuralNet:
-    def __init__(self, level, perceptrons):
+    def __init__(self, name, level, perceptrons):
+        self.NAME = name
+        self.LEVEL = level
+
         self.perceptrons = []
-        for i in range(level):
+        for i in range(self.LEVEL):
             self.perceptrons.append([])
-            for j in range(len(perceptrons[i])):
-                self.perceptrons[i].append(Perceptron(count[i][j]))
+            for j in range(perceptrons[i][0]):
+                self.perceptrons[i].append(Perceptron(perceptrons[i][1], perceptrons[i][2], perceptrons[i][3]))
 
     def __str__(self):
-        perceptrons_list = ''
-        for i in range(len(self.perceptrons)):
-            perceptrons_list += '\n'.join(map(str, self.perceptrons[i]))
-            perceptrons_list += '\n'
-        return perceptrons_list
+        about = 'Тип нейросети: ' + self.NAME + '\n'
+        about += 'Количество уровней: ' + str(self.LEVEL) + '\n'
+        for i in range(self.LEVEL):
+            about += 'Уровень ' + str(i + 1) + '\n'
+            about += ' ' + 'Количество нейронов  - ' + str(len(self.perceptrons[i])) + '\n'
+            about += ' ' + 'Количество дендритов - ' + str(len(self.perceptrons[i][0].w)) + '\n'
+            about += ' ' + 'Скорость обучения    - ' + str(self.perceptrons[i][0].TRAIN_SPEED) + '\n'
+            about += ' ' + 'Функция активации    - ' + str(self.perceptrons[i][0].FUNCTION) + '\n'
+        return about
+
+    def print_w(self):
+        w = ''
+        for i in range(self.LEVEL):
+            for j in range(len(self.perceptrons[i])):
+                w += str(i) + '.' + str(j) + ':\n'
+                w += self.perceptrons[i][j].__str__() + '\n'
+        return w
+
+    def activate(self, x):
+        for j in range(len(self.perceptrons[0])):
+            x_perceptron = x[:len(self.perceptrons[0][j].w) - 1]
+            print(x_perceptron)
 
     def activate_A(self, x):
         y = self.perceptrons[0][0].activate(x)

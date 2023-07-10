@@ -1,3 +1,10 @@
+class Options:
+    def __init__(self):
+        self.gamers = [0, 0]
+        self.score = [0, 0]
+        self.move_turn_start = 0
+
+
 class Gamer:
     def __init__(self, char, ii_train):
         self.CHAR = char
@@ -97,13 +104,30 @@ class Field:
 
 
 class Game:
-    def __init__(self, gamers, score, turn_move_start):
-        self.GAMERS = gamers
+    def __init__(self, ai, options_ai):
+        self.OPTIONS_AI = options_ai
 
-        self.field = Field()
-        self.score = score
-        self.turn_move_start = turn_move_start
-        self.turn_move_current = self.turn_move_start
+        self.ai = ai
+        # self.GAMERS = gamers
+        #
+        # self.field = Field()
+        # self.score = score
+        # self.turn_move_start = turn_move_start
+        # self.turn_move_current = self.turn_move_start
+
+    def print_ai_options_w(self):
+        for i in range(len(self.ai)):
+            for j in range(len(self.ai[i])):
+                print('Нейроная сеть: ' + self.ai[i][j].print_w())
+
+    def test(self):
+        next = True
+        while next:
+            self.print_ai_options_w()
+            x = list(map(int, input('x = ').split()))
+            for i in range(len(self.ai)):
+                for j in range(len(self.ai[i])):
+                    self.ai[i][j].activate(x)
 
     def turn_change(self):
         if self.turn_move_current == 0:
