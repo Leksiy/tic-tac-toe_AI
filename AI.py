@@ -31,6 +31,7 @@ class Perceptron:
                 y = self.sign(y)
             case 'sigmoid':
                 y = self.sigmoid(y)
+        print('per.: ', x_all, self.w, y)
         return y
 
     def study(self, x, y, y_real):
@@ -126,7 +127,7 @@ class Move:
         return str(self.cell) + ' ' + str(self.state) + ' ' + str(self.result)
 
 
-class CPU:
+class AI:
     def __init__(self, class_neural_net):
         self.CLASS_NEURAL_NET = class_neural_net
         self.N = 3

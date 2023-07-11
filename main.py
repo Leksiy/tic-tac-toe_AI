@@ -5,10 +5,10 @@ import AI
 class OptionsAI:
     def __init__(self):
         self.NEURAL_NET_TRAIN_SPEED = 0.2
-        self.NEURAL_NETS = [AI.NeuralNet('A', 1, [[1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 27]]),
-                            AI.NeuralNet('B', 3, [[27, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 1],
-                                                  [27, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 27],
-                                                  [1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 27]]),
+        self.NEURAL_NETS = [AI.NeuralNet('A', 1, [[1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 33]]),
+                            AI.NeuralNet('B', 3, [[33, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 1],
+                                                  [33, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 33],
+                                                  [1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 33]]),
                             AI.NeuralNet('Test', 1, [[1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 3]])
                             ]
 
@@ -43,9 +43,6 @@ class Menu:
         self.N = tic_tac_toe.Field().N
 
         self.options_ai = OptionsAI()
-        self.ais = []
-        for i in range(len(self.options_ai.NEURAL_NETS)):
-            self.ais.append([[self.options_ai.NEURAL_NETS[self.options_ai.neural_nets_type] for j in range(self.N)] for i in range(self.N)])
         self.menu_0()
 
 
@@ -71,7 +68,7 @@ class Menu:
                     menu_exit = self.game_exit()
 
     def game_new(self):
-        game = tic_tac_toe.Game(self.ais[self.options_ai.neural_nets_type], self.options_ai)
+        game = tic_tac_toe.Game(self.options_ai)
         game.start()
         # self.gamers = [tic_tac_toe.Gamer('X', self.ai_train), tic_tac_toe.Gamer('O', self.ai_train)]
         # self.score = [0, 0]

@@ -1,3 +1,6 @@
+import random
+
+
 class Options:
     def __init__(self):
         self.gamers = [0, 0]
@@ -18,7 +21,7 @@ class Gamer:
     def __str__(self):
         return self.GAMER_DICT[self.gamer_class]
 
-    def move(self, field):
+    def move(self, field, ai, gamer_id):
         i = 0
         j = 0
         if self.gamer_class == 1:
@@ -27,13 +30,52 @@ class Gamer:
                 i, j = map(int, input('№ строки № столбца\n').split())
                 move_legal = field.move_legal(i, j)
         else:
-            pass
-            # i, j = self.CPU.move(field)
+            i, j = ai.move(field, gamer_id + 1)
         return i, j
 
     def ii_train(self, result):
         if self.gamer_class == 2 and self.II_TRAIN:
             self.CPU.ii_train(result)
+
+
+class AI:
+    def __init__(self, neural_net):
+        self.neural_net = neural_net
+        self.moves = []
+        self.cells_legal_list = []
+        self.x = []
+        self.y = []
+
+    def move(self, field, gamer):
+        self.cells_legal_list = field.cells_legal()
+        self.x = field.cells_to_x(gamer)
+        self.y = []
+        print(self.neural_net.print_w())
+        for i in self.cells_legal_list:
+            x_all = self.x.copy()
+            for j in i:
+                match j:
+                    case 0:
+                        x_all.extend((1, 0, 0))
+                    case 1:
+                        x_all.extend((0, 1, 0))
+                    case 2:
+                        x_all.extend((0, 0, 1))
+            y = self.neural_net.activate(x_all)
+            print(x_all, y)
+            self.y.append(y)
+        cells_ai_list = []
+        for i in range(len(self.y)):
+            if self.y[i] == 1:
+                cells_ai_list.append(self.cells_legal_list[i])
+        if len(cells_ai_list) > 0:
+            cell = random.choice(cells_ai_list)
+        else:
+            cell = random.choice(self.cells_legal_list)
+        print(self.y, cells_ai_list, cell)
+        self.moves.append([self.x, cell, 1 if cell in cells_ai_list else -1])
+        print(self.moves)
+        return cell
 
 
 class Field:
@@ -57,6 +99,28 @@ class Field:
 
     def move(self, gamer, i, j):
         self.field[i][j] = gamer + 1
+
+    def cells_legal(self):
+        cells_legal_list = []
+        for i in range(self.N):
+            for j in range(self.N):
+                if self.field[i][j] == 0:
+                    cells_legal_list.append([i, j])
+        print(cells_legal_list)
+        return cells_legal_list
+
+    def cells_to_x(self, gamer):
+        x = []
+        for i in range(self.N):
+            for j in range(self.N):
+                if self.field[i][j] == 0:
+                    x.extend((1, 0, 0))
+                elif self.field[i][j] == gamer:
+                    x.extend((0, 1, 0))
+                else:
+                    x.extend((0, 0, 1))
+        print(x)
+        return x
 
     def move_legal(self, i, j):
         if self.field[i][j] == 0:
@@ -95,12 +159,12 @@ class Field:
 
 
 class Game:
-    def __init__(self, ai, options_ai):
+    def __init__(self, options_ai):
         self.OPTIONS_AI = options_ai
         self.GAMERS = [Gamer('X'), Gamer('O')]
         self.TURN_MOVE_START = int(input('Кто ходит первым? (X - 1 / O - 2) ')) - 1
+        self.AI = AI(self.OPTIONS_AI.NEURAL_NETS[self.OPTIONS_AI.neural_nets_type])
 
-        self.ai = ai
         self.field = Field()
         self.score = [0, 0]
         self.turn_move_current = self.TURN_MOVE_START
@@ -143,7 +207,7 @@ class Game:
         round_end = False
         while not round_end:
             print(self)
-            self.field.move(self.turn_move_current, *self.GAMERS[self.turn_move_current].move(self.field))
+            self.field.move(self.turn_move_current, *self.GAMERS[self.turn_move_current].move(self.field, self.AI, self.turn_move_current))
             self.turn_move_current = self.turn_move_change(self.turn_move_current)
             round_end, gamer = self.field.round_over_check()
             if round_end:
