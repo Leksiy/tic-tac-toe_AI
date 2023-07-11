@@ -1,5 +1,6 @@
 import random
 import math
+import copy
 
 
 class Perceptron:
@@ -7,16 +8,18 @@ class Perceptron:
         self.TRAIN_SPEED = train_spped
         self.FUNCTION = function
 
-        self.w = [1 for i in range(x_count + 1)]
+        self.w = [1] * (x_count + 1)
 
-    def sign(self, x):
+    @staticmethod
+    def sign(x):
         if x > 0:
             y = 1
         else:
             y = -1
         return y
 
-    def sigmoid(self, x):
+    @staticmethod
+    def sigmoid(x):
         y = round((1 / (1 + math.exp(-x))), 2)
         return y
 
@@ -91,90 +94,94 @@ class NeuralNet:
     def study(self, x, y, y_real):
         self.perceptrons[0][0].study(x, y, y_real)
 
-    def activate_A(self, x):
-        y = self.perceptrons[0][0].activate(x)
-        return y
-
-    def activate_B(self, x):
-        level_1 = []
-        for i in range(len(x)):
-            level_1.append(self.perceptrons[0][i].activate([x[i]]))
-        level_2 = []
-        for i in range(len(level_1)):
-            level_2.append(self.perceptrons[1][i].activate(level_1))
-        y = self.perceptrons[2][0].activate(level_2)
-        return y
-
-    def study_A(self, result, move):
-        self.perceptrons[0][0].study(result, move)
-
-    def study_B(self, result, move):
-        for i in range(len(self.perceptrons[0])):
-            level_1_move = Move(move.cell, [move.state[i]], move.result)
-            self.perceptrons[0][i].study(result, level_1_move)
-        for i in range(len(self.perceptrons[1])):
-            self.perceptrons[1][i].study(result, move)
-        self.perceptrons[2][0].study(result, move)
-
 
 class Move:
-    def __init__(self, cell, state, result):
-        self.cell = cell
-        self.state = state
-        self.result = result
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
     def __str__(self):
-        return str(self.cell) + ' ' + str(self.state) + ' ' + str(self.result)
+        return str(self.x) + ' ' + str(self.y)
+
+
+class OptionsAI:
+    def __init__(self):
+        self.NEURAL_NET_TRAIN_SPEED = 1
+        self.NEURAL_NETS = [NeuralNet('A', 1, [[1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 33]]),
+                            NeuralNet('B', 3, [[33, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 1],
+                                               [33, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 33],
+                                               [1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 33]]),
+                            NeuralNet('Test', 1, [[1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 3]])
+                            ]
+
+        self.train = True
+        self.neural_nets_type = 0
+
+    def __str__(self):
+        res = ''
+        if self.train:
+            res += 'Включен,'
+        else:
+            res += 'Отключен,'
+        res += ' тип:'
+        res += ' ' + self.NEURAL_NETS[self.neural_nets_type].NAME
+        return res
+
+    def neural_nets_type_switch(self):
+        self.neural_nets_type += 1
+        if self.neural_nets_type not in range(len(self.NEURAL_NETS)):
+            self.neural_nets_type = 0
+
+    def on_off(self):
+        self.train = not self.train
+
+    def about(self):
+        ai_about = str(self.NEURAL_NETS[self.neural_nets_type])
+        return ai_about
 
 
 class AI:
-    def __init__(self, class_neural_net):
-        self.CLASS_NEURAL_NET = class_neural_net
-        self.N = 3
-
+    def __init__(self, neural_net):
+        self.neural_net = copy.deepcopy(neural_net)
         self.moves = []
-        match self.CLASS_NEURAL_NET:
-            case 'A':
-                self.neural_net = [[NeuralNet(1, [[27]]) for i in range(self.N)] for j in range(self.N)]
-            case 'B':
-                self.neural_net = [[NeuralNet(3, [[1 for i in range(27)], [27 for i in range(27)], [27]]) for j in range(self.N)] for z in range(self.N)]
+        self.cells_legal_list = []
+        self.x = []
+        self.y = []
 
-    def move(self, field):
-        legal_cell = []
-        cpu_cell = []
-        state = []
-        for i in range(field.N):
-            for j in range(field.N):
-                if field.field[i][j] == 1:
-                    state.append(0)
-                    state.append(1)
-                    state.append(0)
-                if field.field[i][j] == 2:
-                    state.append(0)
-                    state.append(0)
-                    state.append(1)
-                if field.field[i][j] == 0:
-                    state.append(1)
-                    state.append(0)
-                    state.append(0)
-                    legal_cell.append([i, j])
-        for i in range(field.N):
-            for j in range(field.N):
-                if [i, j] in legal_cell:
-                    if self.neural_net[i][j].activate_B(state) == 1:
-                        cpu_cell.append([i, j])
-        state_cell = cpu_cell.copy()
-        print(state_cell)
-        if len(cpu_cell) == 0:
-            cpu_cell = legal_cell.copy()
-        cell = random.choice(cpu_cell)
-        if cell in state_cell:
-            self.moves.append(Move(cell, state, 1))
+    def move(self, field, gamer):
+        self.cells_legal_list = field.cells_legal()
+        self.x = field.cells_to_x(gamer)
+        self.y = []
+        x_all = None
+        print(self.neural_net.print_w())
+        for i in self.cells_legal_list:
+            x_all = self.x.copy()
+            for j in i:
+                match j:
+                    case 0:
+                        x_all.extend((1, 0, 0))
+                    case 1:
+                        x_all.extend((0, 1, 0))
+                    case 2:
+                        x_all.extend((0, 0, 1))
+            y = self.neural_net.activate(x_all)
+            print(x_all, y)
+            self.y.append(y)
+        cells_ai_list = []
+        for i in range(len(self.y)):
+            if self.y[i] == 1:
+                cells_ai_list.append(self.cells_legal_list[i])
+        if len(cells_ai_list) > 0:
+            cell = random.choice(cells_ai_list)
         else:
-            self.moves.append(Move(cell, state, -1))
+            cell = random.choice(self.cells_legal_list)
+        print(self.y, cells_ai_list, cell)
+        self.moves.append(Move(x_all, 1 if cell in cells_ai_list else -1))
+        print("\n".join(map(str, self.moves)))
         return cell
 
-    def ii_train(self, result):
+    def study(self, y_real):
         for i in self.moves:
-            if i.result != result:
-                self.neural_net[i.cell[0]][i.cell[1]].study_B(result, i)
+            if i.y != y_real:
+                self.neural_net.study(i.x, i.y, y_real)
+                print(self.neural_net.print_w())
