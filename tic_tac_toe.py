@@ -126,6 +126,18 @@ class Move:
             str(self.CELL) + '\n' +\
             'Игрок: ' + str(self.GAMER) + '\n'
 
+    def get_x(self):
+        x = self.FIELD.cells_to_x(self.GAMER)
+        for i in self.CELL:
+            match i:
+                case 0:
+                    x.extend((1, 0, 0))
+                case 1:
+                    x.extend((0, 1, 0))
+                case 2:
+                    x.extend((0, 0, 1))
+        return x
+
 
 class Game:
     def __init__(self, ai, ai_train):
@@ -140,7 +152,8 @@ class Game:
         self.turn_move_round = self.turn_move_current
         self.moves = []
 
-    def turn_move_change(self, turn_move):
+    @staticmethod
+    def turn_move_change(turn_move):
         if turn_move == 0:
             turn_move = 1
         else:
@@ -185,7 +198,6 @@ class Game:
                 self.round_over(gamer)
 
     def round_over(self, gamer):
-        result = ''
         if gamer == 0:
             result = 'Ничья'
         else:
@@ -193,11 +205,7 @@ class Game:
             result = 'Победил %s %s\n' % (self.GAMERS[gamer - 1], self.GAMERS[gamer - 1].CHAR)
             if self.AI_TRAIN:
                 print('Учится ' + str(self.ai))
-            #         if gamer - 1 == i:
-            #             self.y_real = 1
-            #         else:
-            #             self.y_real = -1
-            #         self.ai_study(i)
+                self.ai_study(gamer - 1)
         print(self)
         print(result)
 
@@ -206,6 +214,15 @@ class Game:
         self.turn_move_round = self.turn_move_change(self.turn_move_round)
 
     def ai_study(self, gamer):
-        for i in self.ais[gamer].moves:
+        for i in reversed(self.moves):
+            # cell = self.GAMERS[gamer].move(self.field, self.ai, gamer)
             print(i)
-        self.ais[gamer].study(self.y_real)
+            x = i.get_x()
+            print('x=', x)
+            y = self.ai.neural_net.activate(x)
+            if gamer == i.GAMER:
+                y_real = 1
+            else:
+                y_real = -1
+            print('y=', y, 'y_real=', y_real)
+            self.ai.study(x, y, y_real)

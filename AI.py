@@ -135,8 +135,7 @@ class AI:
         print(self.y, cells_ai_list, cell)
         return cell
 
-    def study(self, y_real):
-        for i in self.moves:
-            if i.y != y_real:
-                self.neural_net.study(i.x, i.y, y_real)
-                print(self.neural_net.print_w())
+    def study(self, x, y, y_real):
+        if y != y_real:
+            self.neural_net.study(x, y, y_real)
+            print(self.neural_net.print_w())

@@ -4,7 +4,7 @@ import AI
 
 class Menu:
     def __init__(self):
-        self.NEURAL_NET_TRAIN_SPEED = 1
+        self.NEURAL_NET_TRAIN_SPEED = 0.2
 
         self.neural_nets = [AI.NeuralNet('A', 1, [[1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 33]]),
                             AI.NeuralNet('B', 3, [[33, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 1],
