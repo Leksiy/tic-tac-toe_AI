@@ -4,17 +4,38 @@ import AI
 
 class Menu:
     def __init__(self):
-        self.options_ai = AI.OptionsAI()
-        self.ais = [AI.AI(self.options_ai.NEURAL_NETS[self.options_ai.neural_nets_type]),
-                    AI.AI(self.options_ai.NEURAL_NETS[self.options_ai.neural_nets_type])]
+        self.NEURAL_NET_TRAIN_SPEED = 1
+
+        self.neural_nets = [AI.NeuralNet('A', 1, [[1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 33]]),
+                            AI.NeuralNet('B', 3, [[33, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 1],
+                                                  [33, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 33],
+                                                  [1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 33]]),
+                            AI.NeuralNet('Test', 1, [[1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 3]])
+                            ]
+        self.ai_neural_net_type = 0
+        self.ai_train = True
+        self.ai = None
+
         self.menu_0()
+
+    def ai_train_state(self):
+        res = ''
+        if self.ai_train:
+            res += 'Включен'
+        else:
+            res += 'Отключен'
+        return res
+
+    def neural_net_type_state(self):
+        res = 'тип: ' + self.neural_nets[self.ai_neural_net_type].NAME
+        return res
 
     def menu_0(self):
         menu_exit = False
         while not menu_exit:
             print('1. Новая игра')
-            print('2. Вкл./Откл. обучение нейросети - ' + str(self.options_ai))
-            print('3. Выбор типа нейросети')
+            print('2. Вкл./Откл. обучение нейросети - ' + self.ai_train_state())
+            print('3. Выбор типа нейросети - ' + self.neural_net_type_state())
             print('4. Информация об нейросети')
             print('0. Выход')
             menu = int(input())
@@ -31,19 +52,20 @@ class Menu:
                     menu_exit = self.game_exit()
 
     def game_new(self):
-        game = tic_tac_toe.Game(self.options_ai, self.ais)
+        self.ai = AI.AI(self.neural_nets[self.ai_neural_net_type])
+        game = tic_tac_toe.Game(self.ai, self.ai_train)
         game.start()
 
     def ai_on_off(self):
-        self.options_ai.on_off()
+        self.ai_train = not self.ai_train
 
     def ai_switch(self):
-        self.options_ai.neural_nets_type_switch()
-        for i in self.ais:
-            i = AI.AI(self.options_ai.NEURAL_NETS[self.options_ai.neural_nets_type])
+        self.ai_neural_net_type += 1
+        if self.ai_neural_net_type not in range(len(self.neural_nets)):
+            self.ai_neural_net_type = 0
 
     def ai_about(self):
-        print(self.options_ai.about())
+        print(str(self.neural_nets[self.ai_neural_net_type]))
 
     @staticmethod
     def game_exit():

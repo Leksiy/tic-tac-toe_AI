@@ -1,3 +1,6 @@
+import copy
+
+
 class Options:
     def __init__(self):
         self.gamers = [0, 0]
@@ -111,18 +114,31 @@ class Field:
         return over, gamer
 
 
+class Move:
+    def __init__(self, field, cell, gamer):
+        self.FIELD = field
+        self.CELL = cell
+        self.GAMER = gamer
+
+    def __str__(self):
+        return 'Игровое поле:\n ' +\
+            str(self.FIELD) + 'Ход: ' +\
+            str(self.CELL) + '\n' +\
+            'Игрок: ' + str(self.GAMER) + '\n'
+
+
 class Game:
-    def __init__(self, options_ai, ais):
-        self.OPTIONS_AI = options_ai
+    def __init__(self, ai, ai_train):
+        self.AI_TRAIN = ai_train
         self.GAMERS = [Gamer('X'), Gamer('O')]
         self.TURN_MOVE_START = int(input('Кто ходит первым? (X - 1 / O - 2) ')) - 1
 
-        self.ais = ais
+        self.ai = ai
         self.field = Field()
         self.score = [0, 0]
         self.turn_move_current = self.TURN_MOVE_START
         self.turn_move_round = self.turn_move_current
-        self.y_real = 0
+        self.moves = []
 
     def turn_move_change(self, turn_move):
         if turn_move == 0:
@@ -156,11 +172,13 @@ class Game:
         round_end = False
         while not round_end:
             print(self)
-            self.field.move(self.turn_move_current,
-                            *self.GAMERS[self.turn_move_current].move(self.field,
-                                                                      self.ais[
-                                                                          self.turn_move_current],
-                                                                      self.turn_move_current))
+            field = copy.deepcopy(self.field)
+            cell = self.GAMERS[self.turn_move_current].move(self.field,
+                                                            self.ai,
+                                                            self.turn_move_current)
+            self.field.move(self.turn_move_current, *cell)
+            self.moves.append(Move(field, cell, self.turn_move_current))
+            print(self.moves[-1])
             self.turn_move_current = self.turn_move_change(self.turn_move_current)
             round_end, gamer = self.field.round_over_check()
             if round_end:
@@ -173,20 +191,18 @@ class Game:
         else:
             self.score[gamer - 1] += 1
             result = 'Победил %s %s\n' % (self.GAMERS[gamer - 1], self.GAMERS[gamer - 1].CHAR)
-            for i in range(len(self.GAMERS)):
-                if self.GAMERS[i].gamer_class == 2 and self.OPTIONS_AI.train:
-                    print('Учится ' + 'Игрок ', self.GAMERS[i].CHAR)
-                    if gamer - 1 == i:
-                        self.y_real = 1
-                    else:
-                        self.y_real = -1
-                    self.ai_study(i)
+            if self.AI_TRAIN:
+                print('Учится ' + str(self.ai))
+            #         if gamer - 1 == i:
+            #             self.y_real = 1
+            #         else:
+            #             self.y_real = -1
+            #         self.ai_study(i)
         print(self)
         print(result)
 
     def round_new(self):
-        for i in self.ais:
-            i.moves = []
+        self.moves = []
         self.turn_move_round = self.turn_move_change(self.turn_move_round)
 
     def ai_study(self, gamer):

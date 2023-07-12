@@ -1,14 +1,16 @@
 import random
 import math
-import copy
 
 
 class Perceptron:
-    def __init__(self, train_spped, function, x_count):
-        self.TRAIN_SPEED = train_spped
+    def __init__(self, train_speed, function, x_count):
+        self.TRAIN_SPEED = train_speed
         self.FUNCTION = function
 
         self.w = [1] * (x_count + 1)
+
+    def __str__(self):
+        return 'w=' + str(self.w)
 
     @staticmethod
     def sign(x):
@@ -34,17 +36,16 @@ class Perceptron:
                 y = self.sign(y)
             case 'sigmoid':
                 y = self.sigmoid(y)
-        print('per.: ', x_all, self.w, y)
+        print('per. activate: x=', x_all, 'w=', self.w, 'y=', y, sep='')
         return y
 
     def study(self, x, y, y_real):
         x_all = x.copy()
         x_all.append(1)
+        print('per. study: x=', x_all, 'w=', self.w, 'y=', y, sep='')
         for i in range(len(self.w)):
             self.w[i] = self.w[i] + self.TRAIN_SPEED * (y_real - y) * x_all[i]
-
-    def __str__(self):
-        return ' '.join(map(str, self.w))
+        print('per. study: x=', x_all, 'w=', self.w, 'y=', y, sep='')
 
 
 class NeuralNet:
@@ -95,64 +96,20 @@ class NeuralNet:
         self.perceptrons[0][0].study(x, y, y_real)
 
 
-class Move:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __str__(self):
-        return str(self.x) + ' ' + str(self.y)
-
-
-class OptionsAI:
-    def __init__(self):
-        self.NEURAL_NET_TRAIN_SPEED = 1
-        self.NEURAL_NETS = [NeuralNet('A', 1, [[1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 33]]),
-                            NeuralNet('B', 3, [[33, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 1],
-                                               [33, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 33],
-                                               [1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 33]]),
-                            NeuralNet('Test', 1, [[1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 3]])
-                            ]
-
-        self.train = True
-        self.neural_nets_type = 0
-
-    def __str__(self):
-        res = ''
-        if self.train:
-            res += 'Включен,'
-        else:
-            res += 'Отключен,'
-        res += ' тип:'
-        res += ' ' + self.NEURAL_NETS[self.neural_nets_type].NAME
-        return res
-
-    def neural_nets_type_switch(self):
-        self.neural_nets_type += 1
-        if self.neural_nets_type not in range(len(self.NEURAL_NETS)):
-            self.neural_nets_type = 0
-
-    def on_off(self):
-        self.train = not self.train
-
-    def about(self):
-        ai_about = str(self.NEURAL_NETS[self.neural_nets_type])
-        return ai_about
-
-
 class AI:
     def __init__(self, neural_net):
-        self.neural_net = copy.deepcopy(neural_net)
-        self.moves = []
+        self.neural_net = neural_net
         self.cells_legal_list = []
         self.x = []
         self.y = []
+
+    def __str__(self):
+        return 'ИИ:\n' + str(self.neural_net)
 
     def move(self, field, gamer):
         self.cells_legal_list = field.cells_legal()
         self.x = field.cells_to_x(gamer)
         self.y = []
-        x_all = None
         print(self.neural_net.print_w())
         for i in self.cells_legal_list:
             x_all = self.x.copy()
@@ -176,8 +133,6 @@ class AI:
         else:
             cell = random.choice(self.cells_legal_list)
         print(self.y, cells_ai_list, cell)
-        self.moves.append(Move(x_all, 1 if cell in cells_ai_list else -1))
-        print("\n".join(map(str, self.moves)))
         return cell
 
     def study(self, y_real):
