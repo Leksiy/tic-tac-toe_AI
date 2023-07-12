@@ -83,7 +83,7 @@ class NeuralNet:
         for i in range(self.LEVEL):
             y = []
             for j in range(len(self.perceptrons[i])):
-                if j == 0:
+                if i == 0:
                     x_perceptron = x_next_level[:len(self.perceptrons[i][j].w) - 1]
                     x_next_level = x_next_level[len(self.perceptrons[i][j].w) - 1:]
                     y.append(self.perceptrons[i][j].activate(x_perceptron))
