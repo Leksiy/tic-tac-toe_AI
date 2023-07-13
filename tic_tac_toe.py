@@ -203,9 +203,9 @@ class Game:
         else:
             self.score[gamer - 1] += 1
             result = 'Победил %s %s\n' % (self.GAMERS[gamer - 1], self.GAMERS[gamer - 1].CHAR)
-            if self.AI_TRAIN:
-                print('Учится ' + str(self.ai))
-                self.ai_study(gamer - 1)
+        if self.AI_TRAIN:
+            print('Учится ' + str(self.ai))
+            self.ai_study(gamer - 1)
         print(self)
         print(result)
 
@@ -219,7 +219,7 @@ class Game:
             x = i.get_x()
             print('x=', x)
             y = self.ai.neural_net.activate(x)
-            if gamer == i.GAMER:
+            if gamer == i.GAMER or gamer == -1:
                 y_real = 1
             else:
                 y_real = -1
