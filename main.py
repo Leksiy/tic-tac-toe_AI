@@ -10,7 +10,9 @@ class Menu:
                             AI.NeuralNet('B', 3, [[33, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 1],
                                                   [33, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 33],
                                                   [1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 33]]),
-                            AI.NeuralNet('Test', 1, [[1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 3]])
+                            AI.NeuralNet('Test', 3, [[33, self.NEURAL_NET_TRAIN_SPEED, 'sign', 1],
+                                                  [2, self.NEURAL_NET_TRAIN_SPEED, 'sign', 33],
+                                                  [1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 2]]),
                             ]
         self.ai_neural_net_type = 0
         self.ai_train = True

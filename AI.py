@@ -7,7 +7,8 @@ class Perceptron:
         self.TRAIN_SPEED = train_speed
         self.FUNCTION = function
 
-        self.w = [1] * (x_count + 1)
+        #self.w = [1] * (x_count + 1)
+        self.w = [round(random.random(), 2) for i in range(x_count + 1)]
 
     def __str__(self):
         return 'w=' + str(self.w)
@@ -44,7 +45,7 @@ class Perceptron:
         x_all.append(1)
         print('per. study: x=', x_all, 'w=', self.w, 'y=', y, sep='')
         for i in range(len(self.w)):
-            self.w[i] = self.w[i] + self.TRAIN_SPEED * (y_real - y) * x_all[i]
+            self.w[i] = self.w[i] + self.TRAIN_SPEED * (y_real - y[0]) * x_all[i]
         print('per. study: x=', x_all, 'w=', self.w, 'y=', y, sep='')
 
 
@@ -78,22 +79,44 @@ class NeuralNet:
                 w += self.perceptrons[i][j].__str__() + '\n'
         return w
 
+    def activate_level(self, level, x):
+        y = []
+        for j in range(len(self.perceptrons[level])):
+            if level == 0:
+                x_perceptron = x[:len(self.perceptrons[level][j].w) - 1]
+                x = x[len(self.perceptrons[level][j].w) - 1:]
+                y.append(self.perceptrons[level][j].activate(x_perceptron))
+            else:
+                y.append(self.perceptrons[level][j].activate(x))
+        x = y.copy()
+        return x
+
     def activate(self, x_real):
         x_next_level = x_real.copy()
         for i in range(self.LEVEL):
-            y = []
-            for j in range(len(self.perceptrons[i])):
-                if i == 0:
-                    x_perceptron = x_next_level[:len(self.perceptrons[i][j].w) - 1]
-                    x_next_level = x_next_level[len(self.perceptrons[i][j].w) - 1:]
-                    y.append(self.perceptrons[i][j].activate(x_perceptron))
-                else:
-                    y.append(self.perceptrons[i][j].activate(x_next_level))
-            x_next_level = y.copy()
+            x_next_level = self.activate_level(i, x_next_level)
         return x_next_level[0]
 
+    def study_level(self, level, x, y, y_real):
+        for i in range(len(level)):
+            level[i].study(x, y, y_real[i])
+
     def study(self, x, y, y_real):
-        self.perceptrons[0][0].study(x, y, y_real)
+        x_levels = [x]
+        for i in range(self.LEVEL):
+            x_levels.append(self.activate_level(i, x_levels[i]))
+        print('x_levels=' + str(x_levels))
+        y_level_real = [y_real]
+        for i in range(self.LEVEL - 1, -1, -1):
+            print('level=' + str(i))
+            print(x_levels[i], x_levels[i + 1])
+            self.study_level(self.perceptrons[i], x_levels[i], x_levels[i + 1], y_level_real)
+            y_level_real = self.perceptrons[i][0].w
+            #self.perceptrons[0][0].study(x, y, y_real)
+        # for i in range(self.LEVEL - 1, -1, -1):
+        #
+        #     for j in range(len(self.LEVEL[i])):
+        #         self.perceptrons[i][j].study(x, y, y_real)
 
 
 class AI:

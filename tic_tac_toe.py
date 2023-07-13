@@ -215,7 +215,6 @@ class Game:
 
     def ai_study(self, gamer):
         for i in reversed(self.moves):
-            # cell = self.GAMERS[gamer].move(self.field, self.ai, gamer)
             print(i)
             x = i.get_x()
             print('x=', x)
