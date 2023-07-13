@@ -82,12 +82,7 @@ class NeuralNet:
     def activate_level(self, level, x):
         y = []
         for j in range(len(self.perceptrons[level])):
-            if level == 0:
-                x_perceptron = x[:len(self.perceptrons[level][j].w) - 1]
-                x = x[len(self.perceptrons[level][j].w) - 1:]
-                y.append(self.perceptrons[level][j].activate(x_perceptron))
-            else:
-                y.append(self.perceptrons[level][j].activate(x))
+            y.append(self.perceptrons[level][j].activate(x))
         x = y.copy()
         return x
 
@@ -111,12 +106,9 @@ class NeuralNet:
             print('level=' + str(i))
             print(x_levels[i], x_levels[i + 1])
             self.study_level(self.perceptrons[i], x_levels[i], x_levels[i + 1], y_level_real)
-            y_level_real = self.perceptrons[i][0].w
-            #self.perceptrons[0][0].study(x, y, y_real)
-        # for i in range(self.LEVEL - 1, -1, -1):
-        #
-        #     for j in range(len(self.LEVEL[i])):
-        #         self.perceptrons[i][j].study(x, y, y_real)
+            y_level_real = self.perceptrons[i][0].w[:-1]
+            for j in range(len(y_level_real)):
+                y_level_real[j] = y_level_real[j] * x_levels[i][j]
 
 
 class AI:
