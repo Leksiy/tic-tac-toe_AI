@@ -140,9 +140,14 @@ class AI:
             print(x_all, y)
             self.y.append(y)
         cells_ai_list = []
+        y_max = max(self.y)
+        print('y_max', y_max)
         for i in range(len(self.y)):
-            if self.y[i] == 1:
+            if self.y[i] == y_max:
                 cells_ai_list.append(self.cells_legal_list[i])
+        # for i in range(len(self.y)):
+        #     if self.y[i] == 1:
+        #         cells_ai_list.append(self.cells_legal_list[i])
         if len(cells_ai_list) > 0:
             cell = random.choice(cells_ai_list)
         else:
