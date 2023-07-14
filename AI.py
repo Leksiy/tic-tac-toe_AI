@@ -121,7 +121,7 @@ class AI:
     def __str__(self):
         return 'ИИ:\n' + str(self.neural_net)
 
-    def move(self, field, gamer):
+    def move(self, field, gamer, train):
         self.cells_legal_list = field.cells_legal()
         self.x = field.cells_to_x(gamer)
         self.y = []
@@ -142,13 +142,13 @@ class AI:
         cells_ai_list = []
         y_max = max(self.y)
         print('y_max', y_max)
-        for i in range(len(self.y)):
-            if self.y[i] == y_max:
-                cells_ai_list.append(self.cells_legal_list[i])
         # for i in range(len(self.y)):
-        #     if self.y[i] == 1:
+        #     if self.y[i] == y_max:
         #         cells_ai_list.append(self.cells_legal_list[i])
-        if len(cells_ai_list) > 0:
+        for i in range(len(self.y)):
+            if self.y[i] == 1:
+                cells_ai_list.append(self.cells_legal_list[i])
+        if len(cells_ai_list) > 0 and not train:
             cell = random.choice(cells_ai_list)
         else:
             cell = random.choice(self.cells_legal_list)

@@ -10,8 +10,10 @@ class Options:
 
 class Gamer:
     def __init__(self, char):
+        self.GAMER_AI = 2
+        self.GAMER_HUMAN = 1
         self.CHAR = char
-        self.GAMER_DICT = {1: 'Человек', 2: 'ИИ'}
+        self.GAMER_DICT = {self.GAMER_HUMAN: 'Человек', self.GAMER_AI: 'ИИ'}
 
         print('Игрок ', self.CHAR)
         for i in self.GAMER_DICT:
@@ -21,16 +23,16 @@ class Gamer:
     def __str__(self):
         return self.GAMER_DICT[self.gamer_class]
 
-    def move(self, field, ai, gamer_id):
+    def move(self, field, ai, gamer_id, train):
         i = 0
         j = 0
-        if self.gamer_class == 1:
+        if self.gamer_class == self.GAMER_HUMAN:
             move_legal = False
             while not move_legal:
                 i, j = map(int, input('№ строки № столбца\n').split())
                 move_legal = field.move_legal(i, j)
         else:
-            i, j = ai.move(field, gamer_id + 1)
+            i, j = ai.move(field, gamer_id + 1, train)
         return i, j
 
 
@@ -186,9 +188,25 @@ class Game:
         while not round_end:
             print(self)
             field = copy.deepcopy(self.field)
-            cell = self.GAMERS[self.turn_move_current].move(self.field,
-                                                            self.ai,
-                                                            self.turn_move_current)
+            accept = False
+            while not accept:
+                cell = self.GAMERS[self.turn_move_current].move(self.field,
+                                                                self.ai,
+                                                                self.turn_move_current, self.AI_TRAIN)
+                if self.AI_TRAIN and self.GAMERS[self.turn_move_current].gamer_class == self.GAMERS[self.turn_move_current].GAMER_AI:
+                    print('Ход: ', cell)
+                    confirm = int(input('Принять ход? (Да - 1 / Нет - 2)\n'))
+                    if confirm == 1:
+                        accept = True
+                        y_real = 1
+                    else:
+                        y_real = -1
+                    self.MOVE = Move(field, cell, self.turn_move_current)
+                    x = self.MOVE.get_x()
+                    y = self.ai.neural_net.activate(x)
+                    self.ai.study(x, y, y_real)
+                else:
+                    accept = True
             self.field.move(self.turn_move_current, *cell)
             self.moves.append(Move(field, cell, self.turn_move_current))
             print(self.moves[-1])
@@ -203,9 +221,9 @@ class Game:
         else:
             self.score[gamer - 1] += 1
             result = 'Победил %s %s\n' % (self.GAMERS[gamer - 1], self.GAMERS[gamer - 1].CHAR)
-        if self.AI_TRAIN:
-            print('Учится ' + str(self.ai))
-            self.ai_study(gamer - 1)
+        # if self.AI_TRAIN:
+        #     print('Учится ' + str(self.ai))
+        #     self.ai_study(gamer - 1)
         print(self)
         print(result)
 
