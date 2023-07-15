@@ -105,10 +105,12 @@ class NeuralNet:
         for i in range(self.LEVEL - 1, -1, -1):
             print('level=' + str(i))
             print(x_levels[i], x_levels[i + 1])
+            w_last = self.perceptrons[i][0].w[:-1].copy()
             self.study_level(self.perceptrons[i], x_levels[i], x_levels[i + 1], y_level_real)
-            y_level_real = self.perceptrons[i][0].w[:-1]
+            y_level_real = self.perceptrons[i][0].w[:-1].copy()
             for j in range(len(y_level_real)):
-                y_level_real[j] = y_level_real[j] * x_levels[i][j]
+                if x_levels[i][j] != 0:
+                    y_level_real[j] = y_level_real[j] * w_last[j] / x_levels[i][j]
 
 
 class AI:
