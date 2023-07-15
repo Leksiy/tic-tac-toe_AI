@@ -1,5 +1,6 @@
 import tic_tac_toe
 import AI
+import test
 
 
 class Menu:
@@ -9,10 +10,8 @@ class Menu:
         self.neural_nets = [AI.NeuralNet('A', 1, [[1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 33]]),
                             AI.NeuralNet('B', 2, [[33, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 33],
                                                   [1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 33]]),
-                            AI.NeuralNet('Test', 4, [[33, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 33],
-                                                     [11, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 33],
-                                                     [11, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 11],
-                                                     [1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 11]]),
+                            AI.NeuralNet('Test', 2, [[4, self.NEURAL_NET_TRAIN_SPEED, 'sigmoid', 4],
+                                                     [1, self.NEURAL_NET_TRAIN_SPEED, 'sign', 4]]),
                             ]
         self.ai_neural_net_type = 0
         self.ai_train = True
@@ -39,6 +38,7 @@ class Menu:
             print('2. Вкл./Откл. обучение нейросети - ' + self.ai_train_state())
             print('3. Выбор типа нейросети - ' + self.neural_net_type_state())
             print('4. Информация об нейросети')
+            print('5. Тест')
             print('0. Выход')
             menu = int(input())
             match menu:
@@ -50,6 +50,8 @@ class Menu:
                     self.ai_switch()
                 case 4:
                     self.ai_about()
+                case 5:
+                    self.test()
                 case _:
                     menu_exit = self.game_exit()
 
@@ -68,6 +70,10 @@ class Menu:
 
     def ai_about(self):
         print(str(self.neural_nets[self.ai_neural_net_type]))
+
+    def test(self):
+        self.ai = test.test(self.neural_nets[self.ai_neural_net_type])
+        self.ai.start_test()
 
     @staticmethod
     def game_exit():
